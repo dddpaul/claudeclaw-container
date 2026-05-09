@@ -155,6 +155,55 @@ volumes:
 
 ---
 
+## Mounting additional directories
+
+You can give claudeclaw access to any directory on your host — notes, documents, code, media — by adding bind mounts to `docker-compose.yml`.
+
+### Read-only access
+
+Use `:ro` when you want claudeclaw to read files but never modify them:
+
+```yaml
+services:
+  claudeclaw:
+    volumes:
+      - claudeclaw-data:/root/.claude        # always keep this one
+      - /Users/you/Notes:/mnt/notes:ro
+      - /Users/you/Documents:/mnt/documents:ro
+```
+
+Inside the container those directories appear at `/mnt/notes` and `/mnt/documents`. claudeclaw can read, search, and reference them but cannot write back to your host.
+
+### Read-write access
+
+Omit `:ro` to allow claudeclaw to create, edit, and delete files:
+
+```yaml
+    volumes:
+      - claudeclaw-data:/root/.claude
+      - /Users/you/Notes:/mnt/notes          # full read-write
+```
+
+Use this when you want claudeclaw to save notes, update files, or write output back to your machine.
+
+### Tips
+
+**Use absolute paths.** Relative paths and `~` don't expand in `docker-compose.yml`. Use the full path or an environment variable:
+```yaml
+- ${HOME}/Notes:/mnt/notes
+```
+
+**Choose mount paths that are easy to reference.** claudeclaw will see whatever path you pick on the right side of the `:`. Keeping them short and under `/mnt/` makes it easy to refer to them in prompts and job definitions — for example: *"summarise everything in /mnt/notes from this week"*.
+
+**Apply least privilege.** Mount read-write only for directories claudeclaw actually needs to write to. Everything else should be `:ro`.
+
+**Changes take effect after a restart:**
+```bash
+docker compose down && docker compose up -d
+```
+
+---
+
 ## Web dashboard
 
 Available at `http://localhost:4632` when `web.enabled` is `true`. Shows active jobs, logs, and session status. To access it from a remote host, either expose the port via a reverse proxy or change the port mapping in `docker-compose.yml`.
