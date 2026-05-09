@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/paulmeier/claudeclaw-container/compare/v1.5.0...v1.5.1) (2026-05-09)
+
+
+### Bug Fixes
+
+* publish release for Node 24 LTS upgrade ([ffeeac0](https://github.com/paulmeier/claudeclaw-container/commit/ffeeac041e17f4a8d646de64d4cc52257a8ff3c8))
+
 # [1.5.0](https://github.com/paulmeier/claudeclaw-container/compare/v1.4.0...v1.5.0) (2026-05-09)
 
 
