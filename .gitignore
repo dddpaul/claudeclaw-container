@@ -16,3 +16,6 @@ settings.json
 
 # Node
 node_modules/
+
+# Local backups
+backups/

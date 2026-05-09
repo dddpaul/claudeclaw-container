@@ -300,6 +300,47 @@ docker run --rm -v claudeclaw-data:/data -v $(pwd):/backup alpine \
 
 ---
 
+## Backups
+
+`backup.sh` snapshots the entire `claudeclaw-data` volume — credentials, settings, logs, jobs, whisper models, plugins, and session history — into a timestamped archive:
+
+```bash
+./backup.sh
+# Saved: ./backups/claudeclaw-2026-05-09-143022.tar.gz (187M)
+```
+
+Archives are written to a `backups/` folder inside the repo directory by default. To use a different location, set `CLAUDECLAW_BACKUP_DIR` before running:
+
+```bash
+CLAUDECLAW_BACKUP_DIR=~/Backups/claudeclaw ./backup.sh
+```
+
+The script mounts the volume read-only so it is safe to run while the container is running.
+
+### Restore
+
+```bash
+docker compose down
+docker volume rm claudeclaw-data
+docker run --rm \
+  -v claudeclaw-data:/data \
+  -v /path/to/backups:/backup:ro \
+  alpine tar xzf /backup/claudeclaw-2026-05-09-143022.tar.gz -C /data
+docker compose up -d
+```
+
+### zsh alias
+
+Add to your `~/.zshrc` to run a backup from anywhere:
+
+```bash
+alias claudeclaw-backup='/bin/zsh -l /Users/you/Projects/claudeclaw-container/backup.sh'
+```
+
+Then `source ~/.zshrc` and call `claudeclaw-backup` whenever you want a snapshot.
+
+---
+
 ## Desktop terminal access
 
 `shell.sh` starts the container if it isn't running and drops you straight into the Claude CLI inside it:
