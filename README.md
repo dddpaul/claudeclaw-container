@@ -310,20 +310,50 @@ docker run --rm -v claudeclaw-data:/data -v $(pwd):/backup alpine \
 
 ## Backups
 
-`backup.sh` snapshots the entire `claudeclaw-data` volume — credentials, settings, logs, jobs, whisper models, plugins, and session history — into a timestamped archive:
+`backup.sh` snapshots the entire claudeclaw data — credentials, settings, logs, jobs, whisper models, plugins, and session history — into a timestamped archive. It can be run from the host or from inside the container.
+
+### From the host
 
 ```bash
 ./backup.sh
 # Saved: ./backups/claudeclaw-2026-05-09-143022.tar.gz (187M)
 ```
 
-Archives are written to a `backups/` folder inside the repo directory by default. To use a different location, set `CLAUDECLAW_BACKUP_DIR` before running:
+Archives are written to `./backups/` by default. Override with `CLAUDECLAW_BACKUP_DIR`:
 
 ```bash
 CLAUDECLAW_BACKUP_DIR=~/Backups/claudeclaw ./backup.sh
 ```
 
-The script mounts the volume read-only so it is safe to run while the container is running.
+The script accesses the volume via a temporary Docker container, so it is safe to run while the daemon is running.
+
+### From inside the container
+
+Mount a backup destination into the container, then run `/backup.sh`:
+
+```bash
+# One-off via docker compose run
+docker compose run -v ~/Backups/claudeclaw:/backup claudeclaw /backup.sh
+
+# Or exec into a running container
+docker compose exec -e CLAUDECLAW_BACKUP_DIR=/backup claudeclaw /backup.sh
+```
+
+To make this permanent, uncomment the backup mount in `docker-compose.yml`:
+
+```yaml
+volumes:
+  - claudeclaw-data:/root/.claude
+  - ${HOME}/Backups/claudeclaw:/backup
+```
+
+Then from any shell inside the container:
+
+```bash
+/backup.sh
+# or with a custom path:
+CLAUDECLAW_BACKUP_DIR=/backup /backup.sh
+```
 
 ### Restore
 
@@ -339,7 +369,7 @@ docker compose up -d
 
 ### zsh alias
 
-Add to your `~/.zshrc` to run a backup from anywhere:
+Add to your `~/.zshrc` to run a host-side backup from anywhere:
 
 ```bash
 alias claudeclaw-backup='/bin/zsh -l /Users/you/Projects/claudeclaw-container/backup.sh'

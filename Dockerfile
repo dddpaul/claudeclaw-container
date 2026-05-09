@@ -25,7 +25,8 @@ RUN git clone --depth 1 https://github.com/moazbuilds/claudeclaw . \
     && bun install --frozen-lockfile
 
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY backup.sh /backup.sh
+RUN chmod +x /entrypoint.sh /backup.sh
 
 # Persist Claude Code config, claudeclaw settings/logs/jobs, and whisper models
 VOLUME /root/.claude
