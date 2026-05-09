@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/paulmeier/claudeclaw-container/compare/v1.2.0...v1.3.0) (2026-05-09)
+
+
+### Features
+
+* add Dockerfile lint, Trivy security scan, and README badges ([0991ea6](https://github.com/paulmeier/claudeclaw-container/commit/0991ea6ac050b524c6585324babbc3cd2b37086b))
+
 # [1.2.0](https://github.com/paulmeier/claudeclaw-container/compare/v1.1.0...v1.2.0) (2026-05-09)
 
 
