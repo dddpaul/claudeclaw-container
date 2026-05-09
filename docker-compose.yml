@@ -2,13 +2,8 @@ services:
   claudeclaw:
     build: .
     restart: unless-stopped
-    environment:
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
-      # Optional: messaging tokens (can also be set in settings.json)
-      # TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
-      # DISCORD_TOKEN: ${DISCORD_TOKEN}
     volumes:
-      # Persists Claude Code auth, claudeclaw config/logs/jobs, and whisper models
+      # Persists Claude Code credentials, claudeclaw config/logs/jobs, and whisper models
       - claudeclaw-data:/root/.claude
       # Optional: mount your own pre-configured settings.json
       # - ./settings.json:/root/.claude/claudeclaw/settings.json:ro

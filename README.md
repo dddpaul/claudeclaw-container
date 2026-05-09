@@ -7,8 +7,33 @@ Docker container for [claudeclaw](https://github.com/moazbuilds/claudeclaw) — 
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) with Compose
-- An Anthropic API key (`sk-ant-...`)
+- A Claude Code subscription (claude.ai/code) — no API key required
 - Optional: a Telegram bot token, Discord bot token, or Slack app token for messaging
+
+---
+
+## Authentication
+
+claudeclaw wraps the `claude` CLI directly and uses your existing Claude Code credentials — it does **not** require an `ANTHROPIC_API_KEY`. Before starting the container you need to authenticate Claude Code into the persistent volume once.
+
+**Step 1 — create the volume and log in:**
+```bash
+docker compose run --rm claudeclaw claude login
+```
+This opens an OAuth browser flow. Complete it and your credentials are saved to the volume at `/root/.claude/.credentials.json`. You only need to do this once — credentials persist across container restarts.
+
+**Step 2 — start the daemon:**
+```bash
+docker compose up -d
+```
+
+**Alternatively**, if you already have Claude Code authenticated on your host machine, you can copy your credentials directly into the volume:
+```bash
+docker run --rm \
+  -v claudeclaw-data:/root/.claude \
+  -v ~/.claude:/host-claude:ro \
+  alpine cp /host-claude/.credentials.json /root/.claude/.credentials.json
+```
 
 ---
 
@@ -17,7 +42,8 @@ Docker container for [claudeclaw](https://github.com/moazbuilds/claudeclaw) — 
 ```bash
 git clone https://github.com/paulmeier/claudeclaw-container
 cd claudeclaw-container
-ANTHROPIC_API_KEY=sk-ant-... docker compose up
+docker compose run --rm claudeclaw claude login   # authenticate once
+docker compose up -d
 ```
 
 The web dashboard will be available at `http://localhost:4632`.

@@ -17,11 +17,14 @@ docker build -t claudeclaw .
 # Build a specific claudeclaw ref
 docker build --build-arg CLAUDECLAW_REF=v1.0.34 -t claudeclaw .
 
+# Authenticate Claude Code into the volume (once)
+docker compose run --rm claudeclaw claude login
+
 # Run via Compose (recommended)
-ANTHROPIC_API_KEY=sk-ant-... docker compose up
+docker compose up
 
 # Run directly
-docker run -e ANTHROPIC_API_KEY=sk-ant-... -p 4632:4632 -v claudeclaw-data:/root/.claude claudeclaw
+docker run -p 4632:4632 -v claudeclaw-data:/root/.claude claudeclaw
 ```
 
 ## Architecture
@@ -50,4 +53,4 @@ Web dashboard is exposed on port 4632. `entrypoint.sh` ensures `web.host` is alw
 - Runtime: Bun; Node.js required for `ogg-opus-decoder` (voice messages)
 - Entry: `bun run src/index.ts [start|stop|status|telegram|discord|slack|send]`
 - whisper.cpp binaries auto-download on first voice transcription (linux-x64/arm64 in containers)
-- Requires `ANTHROPIC_API_KEY` in environment for Claude Code auth
+- Auth: uses Claude Code's OAuth credential store at `/root/.claude/.credentials.json` — no API key needed. Run `claude login` once into the volume before starting the daemon.
