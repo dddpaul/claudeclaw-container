@@ -1,3 +1,10 @@
+## [1.3.6](https://github.com/paulmeier/claudeclaw-container/compare/v1.3.5...v1.3.6) (2026-05-09)
+
+
+### Bug Fixes
+
+* explicitly install ca-certificates in Dockerfile ([0e9b79a](https://github.com/paulmeier/claudeclaw-container/commit/0e9b79a68deca9464fe3050e2d0e42240178c579))
+
 ## [1.3.5](https://github.com/paulmeier/claudeclaw-container/compare/v1.3.4...v1.3.5) (2026-05-09)
 
 
