@@ -1,6 +1,8 @@
 FROM node:20-slim
 
-RUN apt-get update && apt-get install -y \
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     git \
     unzip \
