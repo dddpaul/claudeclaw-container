@@ -1,3 +1,10 @@
+## [1.3.3](https://github.com/paulmeier/claudeclaw-container/compare/v1.3.2...v1.3.3) (2026-05-09)
+
+
+### Bug Fixes
+
+* explicitly pass .hadolint.yaml config to hadolint action ([757b68b](https://github.com/paulmeier/claudeclaw-container/commit/757b68bd7025682954652af730272a6e00f53b9a))
+
 ## [1.3.2](https://github.com/paulmeier/claudeclaw-container/compare/v1.3.1...v1.3.2) (2026-05-09)
 
 
