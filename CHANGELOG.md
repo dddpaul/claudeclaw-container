@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/paulmeier/claudeclaw-container/compare/v1.4.0...v1.5.0) (2026-05-09)
+
+
+### Features
+
+* support running backup.sh from inside the container ([41ca68e](https://github.com/paulmeier/claudeclaw-container/commit/41ca68ea0acbaef12b2848a230d6e94b520cc499))
+
 # [1.4.0](https://github.com/paulmeier/claudeclaw-container/compare/v1.3.6...v1.4.0) (2026-05-09)
 
 
