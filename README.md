@@ -1,5 +1,13 @@
 # claudeclaw-container
 
+[![Release](https://img.shields.io/github/v/release/paulmeier/claudeclaw-container)](https://github.com/paulmeier/claudeclaw-container/releases)
+[![Build](https://github.com/paulmeier/claudeclaw-container/actions/workflows/release.yml/badge.svg)](https://github.com/paulmeier/claudeclaw-container/actions/workflows/release.yml)
+[![Lint](https://github.com/paulmeier/claudeclaw-container/actions/workflows/lint.yml/badge.svg)](https://github.com/paulmeier/claudeclaw-container/actions/workflows/lint.yml)
+[![Security scan](https://github.com/paulmeier/claudeclaw-container/actions/workflows/security.yml/badge.svg)](https://github.com/paulmeier/claudeclaw-container/actions/workflows/security.yml)
+[![Docker Pulls](https://img.shields.io/docker/pulls/paulmeier/claudeclaw-container)](https://hub.docker.com/r/paulmeier/claudeclaw-container)
+[![Docker Image Size](https://img.shields.io/docker/image-size/paulmeier/claudeclaw-container/latest)](https://hub.docker.com/r/paulmeier/claudeclaw-container)
+[![License](https://img.shields.io/github/license/paulmeier/claudeclaw-container)](LICENSE)
+
 Docker container for [claudeclaw](https://github.com/moazbuilds/claudeclaw) — a daemon that extends Claude Code into a personal assistant with Telegram, Discord, and Slack bridges, scheduled jobs, voice transcription, and a web dashboard.
 
 ---
