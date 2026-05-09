@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/paulmeier/claudeclaw-container/compare/v1.1.0...v1.2.0) (2026-05-09)
+
+
+### Features
+
+* add backup.sh with README docs and zsh alias instructions ([aa80b00](https://github.com/paulmeier/claudeclaw-container/commit/aa80b002603ad44d0a5f868ffdc280ceec4e1841))
+
 # [1.1.0](https://github.com/paulmeier/claudeclaw-container/compare/v1.0.1...v1.1.0) (2026-05-09)
 
 
