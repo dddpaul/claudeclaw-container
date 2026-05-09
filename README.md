@@ -4,6 +4,20 @@ Docker container for [claudeclaw](https://github.com/moazbuilds/claudeclaw) — 
 
 ---
 
+## Why run claudeclaw in a container?
+
+**Zero host pollution.** claudeclaw depends on Bun, Node.js, and the Claude Code CLI. Running it natively means installing and maintaining all of that on your machine. The container bundles everything — your host stays clean.
+
+**Controlled access.** By default the daemon can only see what you explicitly give it. Want it to access your notes? Mount that folder. Everything else on your machine is invisible to it. Running natively, claudeclaw inherits access to your entire filesystem.
+
+**Easy to run on a server.** The same image runs on a VPS, home server, or cloud instance without any changes. Your personal assistant stays online even when your laptop is closed.
+
+**Instant reset.** Something went wrong or you want a clean slate? `docker compose down -v` removes everything. No leftover config files scattered across your home directory.
+
+**Reproducible.** The container always starts from a known state. No "works on my machine" issues caused by a different Bun version, a conflicting global npm package, or a PATH quirk.
+
+---
+
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) with Compose
