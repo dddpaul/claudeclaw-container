@@ -1,3 +1,10 @@
+## [1.3.2](https://github.com/paulmeier/claudeclaw-container/compare/v1.3.1...v1.3.2) (2026-05-09)
+
+
+### Bug Fixes
+
+* resolve hadolint warnings in Dockerfile ([8d54dc1](https://github.com/paulmeier/claudeclaw-container/commit/8d54dc107f1167dc028c5bf68e61fc902c1aa1ea))
+
 ## [1.3.1](https://github.com/paulmeier/claudeclaw-container/compare/v1.3.0...v1.3.1) (2026-05-09)
 
 
