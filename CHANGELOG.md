@@ -1,3 +1,10 @@
+## [1.3.5](https://github.com/paulmeier/claudeclaw-container/compare/v1.3.4...v1.3.5) (2026-05-09)
+
+
+### Bug Fixes
+
+* set hadolint failure-threshold to error ([ad043f2](https://github.com/paulmeier/claudeclaw-container/commit/ad043f238313aa128f37289f07ada300446c3368))
+
 ## [1.3.4](https://github.com/paulmeier/claudeclaw-container/compare/v1.3.3...v1.3.4) (2026-05-09)
 
 
