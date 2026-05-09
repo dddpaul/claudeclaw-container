@@ -1,3 +1,10 @@
+## [1.3.4](https://github.com/paulmeier/claudeclaw-container/compare/v1.3.3...v1.3.4) (2026-05-09)
+
+
+### Bug Fixes
+
+* use inline ignore list for hadolint instead of config file ([5cf1c71](https://github.com/paulmeier/claudeclaw-container/commit/5cf1c71698e733588b475613ca795df9abb703bd))
+
 ## [1.3.3](https://github.com/paulmeier/claudeclaw-container/compare/v1.3.2...v1.3.3) (2026-05-09)
 
 
