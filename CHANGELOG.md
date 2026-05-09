@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/paulmeier/claudeclaw-container/compare/v1.3.6...v1.4.0) (2026-05-09)
+
+
+### Features
+
+* restore lint and security as standalone workflows for badges ([a4f72fe](https://github.com/paulmeier/claudeclaw-container/commit/a4f72fee1393cf0736f56cee9428f9a5b8cd8e64))
+
 ## [1.3.6](https://github.com/paulmeier/claudeclaw-container/compare/v1.3.5...v1.3.6) (2026-05-09)
 
 
