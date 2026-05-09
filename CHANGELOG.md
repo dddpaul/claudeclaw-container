@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/paulmeier/claudeclaw-container/compare/v1.0.1...v1.1.0) (2026-05-09)
+
+
+### Features
+
+* add shell.sh, settings.example.json, and desktop access docs ([eb2266e](https://github.com/paulmeier/claudeclaw-container/commit/eb2266ea1d5d30e92a1d88b18ca5f2cc8df4f20d))
+
 ## [1.0.1](https://github.com/paulmeier/claudeclaw-container/compare/v1.0.0...v1.0.1) (2026-05-09)
 
 
