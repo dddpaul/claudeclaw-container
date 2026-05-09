@@ -13,3 +13,6 @@
 
 # Local settings.json if mounted for testing
 settings.json
+
+# Node
+node_modules/
