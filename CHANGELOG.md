@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/paulmeier/claudeclaw-container/compare/v1.3.0...v1.3.1) (2026-05-09)
+
+
+### Bug Fixes
+
+* correct trivy-action version to v0.36.0 ([57b3399](https://github.com/paulmeier/claudeclaw-container/commit/57b3399c8d3bf5fe671d6ce0b08ec460b203cd98))
+
 # [1.3.0](https://github.com/paulmeier/claudeclaw-container/compare/v1.2.0...v1.3.0) (2026-05-09)
 
 
