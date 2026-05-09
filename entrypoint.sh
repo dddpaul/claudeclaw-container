@@ -50,4 +50,10 @@ fi
 # claudeclaw resolves its data directory (.claude/claudeclaw/) from CWD,
 # so run from /root so data lands in the volume-mounted /root/.claude/
 cd /root
+
+# Keep TMPDIR on the same filesystem as the volume so claudeclaw's plugin
+# installer can rename() temp files into /root/.claude/ without EXDEV errors.
+mkdir -p /root/.claude/tmp
+export TMPDIR=/root/.claude/tmp
+
 exec bun run /app/src/index.ts "$@"
