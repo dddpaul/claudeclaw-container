@@ -47,6 +47,12 @@ if [ "${CURRENT_HOST}" = "127.0.0.1" ]; then
     echo "[claudeclaw] Patched web.host to 0.0.0.0 for container networking"
 fi
 
+# Claude Code refuses --dangerously-skip-permissions when running as root unless
+# IS_SANDBOX=1 is set. claudeclaw uses that flag for its bypassPermissions mode,
+# and this container runs as root, so without this env var every spawned `claude`
+# call would exit immediately with no output (chat replies appear blank).
+export IS_SANDBOX=1
+
 # claudeclaw resolves its data directory (.claude/claudeclaw/) from CWD,
 # so run from /root so data lands in the volume-mounted /root/.claude/
 cd /root
