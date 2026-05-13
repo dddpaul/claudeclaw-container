@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="icons/claudeclaw-container.png" alt="claudeclaw-container" width="200">
+</p>
+
 # claudeclaw-container
 
 [![Release](https://img.shields.io/github/v/release/paulmeier/claudeclaw-container)](https://github.com/paulmeier/claudeclaw-container/releases)
