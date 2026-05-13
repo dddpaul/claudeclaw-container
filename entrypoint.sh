@@ -62,4 +62,15 @@ cd /root
 mkdir -p /root/.claude/tmp
 export TMPDIR=/root/.claude/tmp
 
+# Persist npm global installs and npx cache inside the volume so packages
+# added by Claude Code skills (or directly via `npm install -g` / `npx`)
+# survive image updates and container recreation. Without this, anything
+# installed lands in /usr/lib/node_modules or /root/.npm — both wiped on
+# every image pull. NPM_CONFIG_* env vars take precedence over .npmrc, so
+# this also works for users who happen to bind-mount their own .npmrc.
+mkdir -p /root/.claude/npm-global/bin /root/.claude/npm-cache
+export NPM_CONFIG_PREFIX=/root/.claude/npm-global
+export NPM_CONFIG_CACHE=/root/.claude/npm-cache
+export PATH=/root/.claude/npm-global/bin:$PATH
+
 exec bun run /app/src/index.ts "$@"
