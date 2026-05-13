@@ -1,3 +1,10 @@
+## [1.5.2](https://github.com/paulmeier/claudeclaw-container/compare/v1.5.1...v1.5.2) (2026-05-13)
+
+
+### Bug Fixes
+
+* set IS_SANDBOX=1 so Claude Code accepts --dangerously-skip-permissions as root ([e9e499b](https://github.com/paulmeier/claudeclaw-container/commit/e9e499bdef67b7f16c0da7065cae3fabcd6df8e9))
+
 ## [1.5.1](https://github.com/paulmeier/claudeclaw-container/compare/v1.5.0...v1.5.1) (2026-05-09)
 
 
