@@ -290,13 +290,15 @@ docker build --build-arg CLAUDECLAW_REF=v1.0.34 -t claudeclaw .
 
 Everything is stored in the `claudeclaw-data` named volume at `/root/.claude/`:
 
-| Path                       | Contents                         |
-| -------------------------- | -------------------------------- |
-| `claudeclaw/settings.json` | Your configuration               |
-| `claudeclaw/logs/`         | Job and session logs             |
-| `claudeclaw/jobs/`         | Scheduled job definitions        |
-| `claudeclaw/whisper/`      | whisper.cpp binary + model files |
-| `plugins/`                 | Installed Claude Code plugins    |
+| Path                       | Contents                                |
+| -------------------------- | --------------------------------------- |
+| `claudeclaw/settings.json` | Your configuration                      |
+| `claudeclaw/logs/`         | Job and session logs                    |
+| `claudeclaw/jobs/`         | Scheduled job definitions               |
+| `claudeclaw/whisper/`      | whisper.cpp binary + model files        |
+| `plugins/`                 | Installed Claude Code plugins           |
+| `npm-global/`              | Globally installed npm packages + bins  |
+| `npm-cache/`               | npm and npx download cache              |
 
 To back up or inspect the volume:
 
@@ -309,6 +311,67 @@ docker run --rm -v claudeclaw-data:/data -v $(pwd):/backup alpine \
 docker run --rm -v claudeclaw-data:/data -v $(pwd):/backup alpine \
   tar xzf /backup/claudeclaw-backup.tar.gz -C /data
 ```
+
+---
+
+## Adding npm packages
+
+Some Claude Code skills (and your own prompts) call out to CLI tools via `npm install -g` or `npx`. By default those land in `/usr/lib/node_modules` and `/root/.npm` — both inside the container's writable layer and **wiped on every image pull**. To avoid re-installing on every update, the container redirects npm into the persistent volume so packages and the npx cache survive container recreation and image rebuilds.
+
+### How it works
+
+On every start, `entrypoint.sh` exports:
+
+| Variable                                       | Effect                                                  |
+| ---------------------------------------------- | ------------------------------------------------------- |
+| `NPM_CONFIG_PREFIX=/root/.claude/npm-global`   | Global installs go to `npm-global/lib/node_modules/`, executables to `npm-global/bin/` |
+| `NPM_CONFIG_CACHE=/root/.claude/npm-cache`     | npm and npx tarball cache                               |
+| `PATH=/root/.claude/npm-global/bin:$PATH`      | Global binaries are on `PATH` for the daemon and every process it spawns (skills, jobs, `docker exec`) |
+
+Because `/root/.claude` is the named volume, anything written under these paths sticks around across `docker compose down && up`, `docker compose pull`, and image rebuilds. The persistent layout adds these to the volume:
+
+```
+/root/.claude/
+├── npm-global/
+│   ├── bin/        # binaries on PATH
+│   └── lib/node_modules/
+└── npm-cache/      # npm + npx tarball cache
+```
+
+`NPM_CONFIG_*` env vars take precedence over `.npmrc`, so this also works if you bind-mount your own `.npmrc`.
+
+### Installing a package
+
+From a running container, or from a Claude Code skill:
+
+```bash
+docker compose exec claudeclaw npm install -g cowsay
+docker compose exec claudeclaw cowsay hello   # binary persists across restarts
+```
+
+`npx` works the same way — first call downloads, subsequent calls (even after container recreation) read from the cached tarball.
+
+### Bake packages into a custom image
+
+If you'd rather not depend on the entrypoint running before a package is available (for example, packages needed at image-build time or referenced by other tooling), extend the base image:
+
+```Dockerfile
+FROM paulmeier/claudeclaw-container:latest
+RUN npm install -g cowsay some-other-pkg
+```
+
+Then point `docker-compose.yml` at the new image:
+
+```yaml
+services:
+  claudeclaw:
+    image: my/claudeclaw:latest
+```
+
+### Caveats
+
+- Wiping the volume (`docker compose down -v`) removes installed packages along with everything else. Use [`backup.sh`](#backups) if you want them preserved.
+- The volume is shared across all claudeclaw state, so a runaway `npm install` can consume significant space. `du -sh /root/.claude/npm-*` to audit.
 
 ---
 
