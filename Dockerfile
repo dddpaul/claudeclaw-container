@@ -17,11 +17,12 @@ ENV PATH="/root/.bun/bin:$PATH"
 # Install Claude Code CLI
 RUN npm install -g @anthropic-ai/claude-code
 
-# Clone claudeclaw
+# Clone claudeclaw at the ref specified by CLAUDECLAW_REF.
+# Override at build time with --build-arg CLAUDECLAW_REF=<branch|tag|sha> to pin.
 WORKDIR /app
-ARG CLAUDECLAW_REF=main
-RUN git clone --depth 1 https://github.com/moazbuilds/claudeclaw . \
-    && git fetch --depth 1 origin ${CLAUDECLAW_REF} 2>/dev/null || true \
+ARG CLAUDECLAW_REF=master
+RUN git clone https://github.com/moazbuilds/claudeclaw . \
+    && git checkout "${CLAUDECLAW_REF}" \
     && bun install --frozen-lockfile
 
 COPY entrypoint.sh /entrypoint.sh
