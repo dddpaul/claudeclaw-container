@@ -5,11 +5,10 @@
 # claudeclaw-container
 
 [![Release](https://img.shields.io/github/v/release/paulmeier/claudeclaw-container)](https://github.com/paulmeier/claudeclaw-container/releases)
-[![CI](https://github.com/paulmeier/claudeclaw-container/actions/workflows/ci.yml/badge.svg)](https://github.com/paulmeier/claudeclaw-container/actions/workflows/ci.yml)
+[![Release Please](https://github.com/paulmeier/claudeclaw-container/actions/workflows/release-please.yml/badge.svg)](https://github.com/paulmeier/claudeclaw-container/actions/workflows/release-please.yml)
 [![Lint](https://github.com/paulmeier/claudeclaw-container/actions/workflows/lint.yml/badge.svg)](https://github.com/paulmeier/claudeclaw-container/actions/workflows/lint.yml)
 [![Security scan](https://github.com/paulmeier/claudeclaw-container/actions/workflows/security.yml/badge.svg)](https://github.com/paulmeier/claudeclaw-container/actions/workflows/security.yml)
-[![Docker Pulls](https://img.shields.io/docker/pulls/paulmeier/claudeclaw-container)](https://hub.docker.com/r/paulmeier/claudeclaw-container)
-[![Docker Image Size](https://img.shields.io/docker/image-size/paulmeier/claudeclaw-container/latest)](https://hub.docker.com/r/paulmeier/claudeclaw-container)
+[![Container](https://img.shields.io/badge/ghcr.io-paulmeier%2Fclaudeclaw--container-2496ED?logo=docker&logoColor=white)](https://github.com/paulmeier/claudeclaw-container/pkgs/container/claudeclaw-container)
 [![License](https://img.shields.io/github/license/paulmeier/claudeclaw-container)](LICENSE)
 
 Docker container for [claudeclaw](https://github.com/moazbuilds/claudeclaw) — a daemon that extends Claude Code into a personal assistant with Telegram, Discord, and Slack bridges, scheduled jobs, voice transcription, and a web dashboard.
@@ -356,7 +355,7 @@ docker compose exec claudeclaw cowsay hello   # binary persists across restarts
 If you'd rather not depend on the entrypoint running before a package is available (for example, packages needed at image-build time or referenced by other tooling), extend the base image:
 
 ```Dockerfile
-FROM paulmeier/claudeclaw-container:latest
+FROM ghcr.io/paulmeier/claudeclaw-container:latest
 RUN npm install -g cowsay some-other-pkg
 ```
 
