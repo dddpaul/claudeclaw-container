@@ -5,6 +5,14 @@
 
 * persist npm global installs and npx cache in the appdata volume ([1786d18](https://github.com/paulmeier/claudeclaw-container/commit/1786d18735738715a901f2acd795c866559fd936))
 
+## [1.7.0](https://github.com/paulmeier/claudeclaw-container/compare/v1.6.1...v1.7.0) (2026-05-17)
+
+
+### Features
+
+* migrate to release-please + GHCR (same pattern as plus-container) ([c86a75e](https://github.com/paulmeier/claudeclaw-container/commit/c86a75ee12aa3da227983f61d4907934bbceab95))
+* migrate to release-please + GHCR (same pattern as plus-container) ([64b0594](https://github.com/paulmeier/claudeclaw-container/commit/64b0594f4d4be8d1dcac66dc69b6ccd7804cf2b7))
+
 ## [1.5.2](https://github.com/paulmeier/claudeclaw-container/compare/v1.5.1...v1.5.2) (2026-05-13)
 
 
