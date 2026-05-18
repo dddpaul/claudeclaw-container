@@ -460,7 +460,7 @@ RUN pip install httpie ruff
 
 ### Python version migration
 
-Python user-base directories are keyed by minor version (`lib/python3.11/`, `lib/python3.12/`, …). When the base image's Python minor version bumps, packages installed under the old version become invisible to the new interpreter. Run `migrate-python.sh` inside the container to reinstall them:
+Python user-base directories are keyed by minor version (`lib/python3.11/`, `lib/python3.12/`, …). When the base image's Python minor version bumps, packages installed under the old version become **invisible** to the new interpreter — the old `site-packages/` directory still exists on disk but is simply not on the new Python's search path. Run `migrate-python.sh` inside the container to reinstall them:
 
 ```bash
 docker compose exec claudeclaw /migrate-python.sh
@@ -476,6 +476,7 @@ docker compose exec claudeclaw rm -rf /root/.claude/python-user/lib/python3.11
 ### Caveats
 
 - Python user-base is keyed by Python minor version (`python3.11/site-packages` etc.). If the base image's Python minor version ever bumps, previously installed packages become invisible — run [`/migrate-python.sh`](#python-version-migration) to recover them.
+- For Python CLI tools specifically, [`uv tool install`](#adding-uv-packages) avoids this problem: UV tools live in named venvs, not version-keyed directories, so they survive Python minor version changes more gracefully.
 - `du -sh /root/.claude/python-*` to audit space usage.
 
 ---
@@ -539,7 +540,7 @@ The script calls `pnpm ls --global --json --depth=0` to enumerate installed pack
 ### Caveats
 
 - Wiping the volume (`docker compose down -v`) removes all pnpm global packages and the store along with everything else. Use [`backup.sh`](#backups) to preserve them.
-- If the base image's Node major version bumps, native addons will break. Run [`/migrate-pnpm.sh`](#node-version-migration-2) to reinstall and recompile them.
+- If the base image's Node major version bumps, native addons will break. Run [`/migrate-pnpm.sh`](#node-version-migration-1) to reinstall and recompile them.
 - `du -sh /root/.claude/pnpm-*` to audit space usage. The content-addressable store deduplicates package content but can still grow large if many different versions are installed over time.
 
 ---
@@ -610,13 +611,17 @@ RUN uv tool install ruff httpie
 
 ### Python version migration
 
-UV tools run in isolated venvs that record the Python interpreter path they were created with. If the base image's system Python minor version changes (e.g. 3.11 → 3.12), those interpreter paths become stale and the tools will fail to run. Run `migrate-uv.sh` to recreate each venv under the current Python:
+UV tools run in isolated venvs that record the **absolute path** of the Python interpreter they were created with (e.g. `/usr/bin/python3.11`). This is different from the pip problem: pip packages become *invisible* because the version-keyed directory is no longer searched; UV tool venvs become *invalid* because the recorded interpreter path no longer exists. The symptom is also different — pip-installed scripts silently produce import errors, while UV tool shims fail immediately at exec time.
+
+If the base image's system Python minor version changes (e.g. 3.11 → 3.12), run `migrate-uv.sh` to recreate each venv under the current Python:
 
 ```bash
 docker compose exec claudeclaw /migrate-uv.sh
 ```
 
-The script reads the original package name and version specifier from each tool's `uv-receipt.json`, then calls `uv tool install --reinstall` to rebuild the venv. If `uvx` environments are also broken, clearing the cache forces them to be rebuilt on the next call:
+The script reads the original package name and version specifier from each tool's `uv-receipt.json`, then calls `uv tool install --reinstall` to rebuild the venv.
+
+`uvx` environments are simpler to recover — they are ephemeral by design. The cache just makes repeat calls fast; nothing needs to be reinstalled. If a `uvx` environment is broken, clear the cache and it will be rebuilt on the next call:
 
 ```bash
 docker compose exec claudeclaw uv cache clean
@@ -752,3 +757,17 @@ Ensure `web.enabled` is `true` and `web.host` is `"0.0.0.0"` in settings. The en
 
 **Whisper download fails on first start**
 The container needs outbound internet access. If behind a proxy, set `HTTP_PROXY` / `HTTPS_PROXY` environment variables in `docker-compose.yml`.
+
+**Packages or tools stopped working after pulling a new image**
+A base image update may have bumped the Node or Python minor version, breaking previously installed packages. Run the relevant migration script(s) inside the container:
+
+| What broke | Script | Trigger |
+|---|---|---|
+| `npm install -g` packages with native addons | `/migrate-npm.sh` | Node major version bump |
+| `pnpm add -g` packages with native addons | `/migrate-pnpm.sh` | Node major version bump |
+| `npx` cached packages with native addons | `rm -rf /root/.claude/npm-cache/_npx` | Node major version bump |
+| `pip install` packages (import errors / missing) | `/migrate-python.sh` | Python minor version bump |
+| `uv tool install` tools (exec fails immediately) | `/migrate-uv.sh` | Python minor version bump |
+| `uvx` cached environments | `uv cache clean` | Python minor version bump |
+
+Pure JavaScript npm/pnpm packages and pure Python pip packages with no native extensions survive version bumps without any migration.
