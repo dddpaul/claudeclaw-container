@@ -420,9 +420,24 @@ FROM ghcr.io/paulmeier/claudeclaw-container:latest
 RUN pip install httpie ruff
 ```
 
+### Python version migration
+
+Python user-base directories are keyed by minor version (`lib/python3.11/`, `lib/python3.12/`, …). When the base image's Python minor version bumps, packages installed under the old version become invisible to the new interpreter. Run `migrate-python.sh` inside the container to reinstall them:
+
+```bash
+docker compose exec claudeclaw /migrate-python.sh
+```
+
+The script scans every old `pythonX.Y` directory under `python-user/lib/`, reads each package's name and version from `.dist-info/METADATA`, and calls `pip install` to reinstall them under the current version. The old directories are left in place so you can verify nothing is missing before removing them:
+
+```bash
+# Confirm your packages work, then clean up the old directory
+docker compose exec claudeclaw rm -rf /root/.claude/python-user/lib/python3.11
+```
+
 ### Caveats
 
-- Python user-base is keyed by Python minor version (`python3.11/site-packages` etc.). If the base image's Python minor version ever bumps, previously installed packages become invisible — same trade-off as `npm-global` if Node's major version bumps.
+- Python user-base is keyed by Python minor version (`python3.11/site-packages` etc.). If the base image's Python minor version ever bumps, previously installed packages become invisible — run [`/migrate-python.sh`](#python-version-migration) to recover them.
 - `du -sh /root/.claude/python-*` to audit space usage.
 
 ---
