@@ -30,7 +30,8 @@ RUN git clone https://github.com/moazbuilds/claudeclaw . \
 COPY entrypoint.sh /entrypoint.sh
 COPY backup.sh /backup.sh
 COPY migrate-python.sh /migrate-python.sh
-RUN chmod +x /entrypoint.sh /backup.sh /migrate-python.sh
+COPY migrate-npm.sh /migrate-npm.sh
+RUN chmod +x /entrypoint.sh /backup.sh /migrate-python.sh /migrate-npm.sh
 
 # Persist Claude Code config, claudeclaw settings/logs/jobs, and whisper models
 VOLUME /root/.claude

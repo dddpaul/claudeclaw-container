@@ -369,9 +369,22 @@ services:
     image: my/claudeclaw:latest
 ```
 
+### Node version migration
+
+npm global packages all live in a single `npm-global/lib/node_modules/` directory — there is no version-keyed subdirectory like Python's `lib/pythonX.Y/`. Pure JavaScript packages keep working across Node major versions without any action. The problem is **native addons** (packages that compile `.node` binaries via `node-gyp`): those are built against a specific Node ABI and will fail to load under a different major version. Reinstalling forces npm to recompile them for the current runtime.
+
+Run `migrate-npm.sh` inside the container after a base image update that bumps the Node major version:
+
+```bash
+docker compose exec claudeclaw /migrate-npm.sh
+```
+
+The script reads `name` and `version` from each top-level `package.json` in `npm-global/lib/node_modules/` (including scoped packages), then calls `npm install -g name@version` for all of them, recompiling any native addons for the current Node ABI.
+
 ### Caveats
 
 - Wiping the volume (`docker compose down -v`) removes installed packages along with everything else. Use [`backup.sh`](#backups) if you want them preserved.
+- If the base image's Node major version bumps, native addons will break. Run [`/migrate-npm.sh`](#node-version-migration) to reinstall and recompile them.
 - The volume is shared across all claudeclaw state, so a runaway `npm install` can consume significant space. `du -sh /root/.claude/npm-*` to audit.
 
 ---
