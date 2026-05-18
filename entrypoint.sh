@@ -111,4 +111,8 @@ mkdir -p /root/.claude/pnpm-global /root/.claude/pnpm-store
 export PNPM_HOME=/root/.claude/pnpm-global
 export PATH=/root/.claude/pnpm-global:$PATH
 
+# Run startup diagnostics: print runtime versions, package inventories, and any
+# migration warnings. Always exits 0 — warnings are advisory.
+/healthcheck.sh || true
+
 exec bun run /app/src/index.ts "$@"

@@ -741,6 +741,28 @@ Then run `source ~/.zshrc` and type `claudeclaw` anywhere.
 
 ---
 
+## Health check
+
+`healthcheck.sh` runs automatically at every container start and is available as `/healthcheck` (no `.sh`) at any time:
+
+```bash
+docker compose exec claudeclaw /healthcheck
+```
+
+It reports:
+
+- **Runtimes** — Node version and ABI, npm, pnpm, Bun, Python, pip, and uv versions
+- **npm globals** — installed packages with versions; warns if the Node ABI has changed since the last start (indicating native addons may be broken)
+- **pnpm globals** — same ABI check for pnpm-managed globals
+- **pip user packages** — lists installed packages; warns if stale `pythonX.Y/site-packages/` directories from an older Python minor version are found
+- **uv tools** — lists installed tools; detects broken venvs by checking that the Python interpreter path recorded in each venv's `pyvenv.cfg` still exists on disk
+- **Volume disk usage** — size of every package manager directory under `/root/.claude/`
+- **Environment** — the active values of all package-manager env vars (`NPM_CONFIG_PREFIX`, `PYTHONUSERBASE`, `UV_TOOL_DIR`, etc.) so you can verify they point where expected
+
+Warnings include the exact migration command to run. The script exits 0 regardless of warnings — they are advisory and do not block startup.
+
+---
+
 ## Troubleshooting
 
 **Container exits immediately**

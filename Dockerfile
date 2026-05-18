@@ -43,7 +43,11 @@ COPY migrate-python.sh /migrate-python.sh
 COPY migrate-npm.sh /migrate-npm.sh
 COPY migrate-pnpm.sh /migrate-pnpm.sh
 COPY migrate-uv.sh /migrate-uv.sh
-RUN chmod +x /entrypoint.sh /backup.sh /migrate-python.sh /migrate-npm.sh /migrate-pnpm.sh /migrate-uv.sh
+COPY healthcheck.sh /healthcheck.sh
+RUN chmod +x /entrypoint.sh /backup.sh \
+             /migrate-python.sh /migrate-npm.sh /migrate-pnpm.sh /migrate-uv.sh \
+             /healthcheck.sh \
+    && ln -s /healthcheck.sh /healthcheck
 
 # Persist Claude Code config, claudeclaw settings/logs/jobs, and whisper models
 VOLUME /root/.claude
