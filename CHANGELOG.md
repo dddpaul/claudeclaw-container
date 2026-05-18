@@ -5,6 +5,14 @@
 
 * persist npm global installs and npx cache in the appdata volume ([1786d18](https://github.com/paulmeier/claudeclaw-container/commit/1786d18735738715a901f2acd795c866559fd936))
 
+## [1.7.1](https://github.com/paulmeier/claudeclaw-container/compare/v1.7.0...v1.7.1) (2026-05-18)
+
+
+### Bug Fixes
+
+* install python3 to support Claude Code subprocesses ([7b85e76](https://github.com/paulmeier/claudeclaw-container/commit/7b85e76996bfc45728a95fb72c0eb8f38e6e0695))
+* install python3 to support Claude Code subprocesses ([270e932](https://github.com/paulmeier/claudeclaw-container/commit/270e932e12c0ad2c43c0ec247579cacd3abebd22)), closes [#11](https://github.com/paulmeier/claudeclaw-container/issues/11)
+
 ## [1.7.0](https://github.com/paulmeier/claudeclaw-container/compare/v1.6.1...v1.7.0) (2026-05-17)
 
 
