@@ -297,9 +297,11 @@ Everything is stored in the `claudeclaw-data` named volume at `/root/.claude/`:
 | `claudeclaw/whisper/`      | whisper.cpp binary + model files        |
 | `plugins/`                 | Installed Claude Code plugins           |
 | `npm-global/`              | Globally installed npm packages + bins  |
-| `npm-cache/`               | npm and npx download cache              |
+| `npm-cache/`               | npm download cache; `_npx/` subdir holds the npx tarball cache |
 | `python-user/`             | `pip install` site-packages + bins      |
 | `pip-cache/`               | pip download cache                      |
+| `pnpm-global/`             | pnpm global package shims + bins        |
+| `pnpm-store/`              | pnpm content-addressable package store  |
 
 To back up or inspect the volume:
 
@@ -350,7 +352,20 @@ docker compose exec claudeclaw npm install -g cowsay
 docker compose exec claudeclaw cowsay hello   # binary persists across restarts
 ```
 
-`npx` works the same way — first call downloads, subsequent calls (even after container recreation) read from the cached tarball.
+### npx
+
+`npx` requires no separate setup. Because `NPM_CONFIG_CACHE` already points into the volume, npx's download cache (`npm-cache/_npx/`) is persisted automatically — the tarball is fetched once and reused across container recreations:
+
+```bash
+docker compose exec claudeclaw npx cowsay hello   # downloads on first call
+docker compose exec claudeclaw npx cowsay hello   # reads from volume cache
+```
+
+Note that npx does not maintain a persistent global install — it downloads, runs, and exits. The volume caches the tarball so subsequent calls are fast, but there is no equivalent of `npm install -g` to migrate. If a Node major version bump breaks a cached npx package with native addons, clear the cache and npx will redownload a fresh copy on the next call:
+
+```bash
+docker compose exec claudeclaw rm -rf /root/.claude/npm-cache/_npx
+```
 
 ### Bake packages into a custom image
 
@@ -380,6 +395,12 @@ docker compose exec claudeclaw /migrate-npm.sh
 ```
 
 The script reads `name` and `version` from each top-level `package.json` in `npm-global/lib/node_modules/` (including scoped packages), then calls `npm install -g name@version` for all of them, recompiling any native addons for the current Node ABI.
+
+For **npx**, there is nothing to reinstall — npx redownloads on demand. If a cached npx package fails due to a stale native addon, clear the npx cache:
+
+```bash
+docker compose exec claudeclaw rm -rf /root/.claude/npm-cache/_npx
+```
 
 ### Caveats
 
@@ -452,6 +473,70 @@ docker compose exec claudeclaw rm -rf /root/.claude/python-user/lib/python3.11
 
 - Python user-base is keyed by Python minor version (`python3.11/site-packages` etc.). If the base image's Python minor version ever bumps, previously installed packages become invisible — run [`/migrate-python.sh`](#python-version-migration) to recover them.
 - `du -sh /root/.claude/python-*` to audit space usage.
+
+---
+
+## Adding pnpm packages
+
+pnpm is pre-installed in the image. Its global package shims and content-addressable store are both redirected into the persistent volume so packages added with `pnpm add -g` survive container recreation and image rebuilds.
+
+### How it works
+
+On every start, `entrypoint.sh` exports:
+
+| Variable / config                                           | Effect                                                  |
+| ----------------------------------------------------------- | ------------------------------------------------------- |
+| `PNPM_HOME=/root/.claude/pnpm-global`                      | Global package shims (executables) go here              |
+| `PATH=/root/.claude/pnpm-global:$PATH`                     | Those shims are on `PATH` for the daemon and every process it spawns |
+| `store-dir=/root/.claude/pnpm-store` (image-level config)  | pnpm's content-addressable store; written to `/root/.config/pnpm/rc` at image build time |
+
+The store config is baked into the image layer so it is always present; the store data itself lands in the volume at runtime. Layout added to the volume:
+
+```
+/root/.claude/
+├── pnpm-global/    # shim scripts on PATH (one per globally installed package)
+└── pnpm-store/     # content-addressable package store
+```
+
+### Installing a package
+
+From a running container, or from a Claude Code skill:
+
+```bash
+docker compose exec claudeclaw pnpm add -g cowsay
+docker compose exec claudeclaw cowsay hello   # shim persists across restarts
+```
+
+### Bake packages into a custom image
+
+```Dockerfile
+FROM ghcr.io/paulmeier/claudeclaw-container:latest
+RUN pnpm add -g cowsay some-other-pkg
+```
+
+Then point `docker-compose.yml` at the new image:
+
+```yaml
+services:
+  claudeclaw:
+    image: my/claudeclaw:latest
+```
+
+### Node version migration
+
+pnpm global packages face the same native addon problem as npm globals — `.node` binaries compiled against the old ABI fail silently under a new Node major version. Run `migrate-pnpm.sh` to reinstall:
+
+```bash
+docker compose exec claudeclaw /migrate-pnpm.sh
+```
+
+The script calls `pnpm ls --global --json --depth=0` to enumerate installed packages, then reinstalls each pinned `name@version` with `pnpm add -g`, forcing recompilation of any native addons.
+
+### Caveats
+
+- Wiping the volume (`docker compose down -v`) removes all pnpm global packages and the store along with everything else. Use [`backup.sh`](#backups) to preserve them.
+- If the base image's Node major version bumps, native addons will break. Run [`/migrate-pnpm.sh`](#node-version-migration-2) to reinstall and recompile them.
+- `du -sh /root/.claude/pnpm-*` to audit space usage. The content-addressable store deduplicates package content but can still grow large if many different versions are installed over time.
 
 ---
 

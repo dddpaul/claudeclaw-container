@@ -88,4 +88,13 @@ export PIP_BREAK_SYSTEM_PACKAGES=1
 export PIP_CACHE_DIR=/root/.claude/pip-cache
 export PATH=/root/.claude/python-user/bin:$PATH
 
+# Persist pnpm global package shims inside the volume.
+# PNPM_HOME is where pnpm places the executable shims for globally added packages
+# (pnpm add -g). The content-addressable store path is set in the image via
+# /root/.config/pnpm/rc (store-dir=/root/.claude/pnpm-store), so store data also
+# lands in the volume without needing an env var here.
+mkdir -p /root/.claude/pnpm-global /root/.claude/pnpm-store
+export PNPM_HOME=/root/.claude/pnpm-global
+export PATH=/root/.claude/pnpm-global:$PATH
+
 exec bun run /app/src/index.ts "$@"
