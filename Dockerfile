@@ -16,6 +16,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl -fsSL https://bun.sh/install | bash
 ENV PATH="/root/.bun/bin:$PATH"
 
+# Install UV (fast Python package and project manager)
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+ENV PATH="/root/.local/bin:$PATH"
+
 # Install Claude Code CLI and pnpm.
 # pnpm's content-addressable store is configured to the persistent volume path so
 # that downloaded package content survives image rebuilds. The store-dir setting is
@@ -38,7 +42,8 @@ COPY backup.sh /backup.sh
 COPY migrate-python.sh /migrate-python.sh
 COPY migrate-npm.sh /migrate-npm.sh
 COPY migrate-pnpm.sh /migrate-pnpm.sh
-RUN chmod +x /entrypoint.sh /backup.sh /migrate-python.sh /migrate-npm.sh /migrate-pnpm.sh
+COPY migrate-uv.sh /migrate-uv.sh
+RUN chmod +x /entrypoint.sh /backup.sh /migrate-python.sh /migrate-npm.sh /migrate-pnpm.sh /migrate-uv.sh
 
 # Persist Claude Code config, claudeclaw settings/logs/jobs, and whisper models
 VOLUME /root/.claude

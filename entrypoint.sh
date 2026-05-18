@@ -88,6 +88,20 @@ export PIP_BREAK_SYSTEM_PACKAGES=1
 export PIP_CACHE_DIR=/root/.claude/pip-cache
 export PATH=/root/.claude/python-user/bin:$PATH
 
+# Persist UV tool installs, executables, cache, and UV-managed Python versions inside
+# the volume. UV_TOOL_DIR holds the isolated venv for each `uv tool install`-ed package;
+# UV_TOOL_BIN_DIR holds the shim scripts that land on PATH; UV_CACHE_DIR is the shared
+# download cache also used by uvx for its ephemeral environments; UV_PYTHON_INSTALL_DIR
+# persists any Python versions downloaded via `uv python install` so they survive image
+# rebuilds and do not need to be re-fetched on every container start.
+mkdir -p /root/.claude/uv-tools /root/.claude/uv-tool-bin \
+         /root/.claude/uv-cache /root/.claude/uv-python
+export UV_TOOL_DIR=/root/.claude/uv-tools
+export UV_TOOL_BIN_DIR=/root/.claude/uv-tool-bin
+export UV_CACHE_DIR=/root/.claude/uv-cache
+export UV_PYTHON_INSTALL_DIR=/root/.claude/uv-python
+export PATH=/root/.claude/uv-tool-bin:$PATH
+
 # Persist pnpm global package shims inside the volume.
 # PNPM_HOME is where pnpm places the executable shims for globally added packages
 # (pnpm add -g). The content-addressable store path is set in the image via

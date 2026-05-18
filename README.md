@@ -302,6 +302,10 @@ Everything is stored in the `claudeclaw-data` named volume at `/root/.claude/`:
 | `pip-cache/`               | pip download cache                      |
 | `pnpm-global/`             | pnpm global package shims + bins        |
 | `pnpm-store/`              | pnpm content-addressable package store  |
+| `uv-tools/`                | `uv tool install` isolated venvs        |
+| `uv-tool-bin/`             | UV tool shims + bins                    |
+| `uv-cache/`                | UV download cache; `uvx` environments   |
+| `uv-python/`               | UV-managed Python installations         |
 
 To back up or inspect the volume:
 
@@ -537,6 +541,93 @@ The script calls `pnpm ls --global --json --depth=0` to enumerate installed pack
 - Wiping the volume (`docker compose down -v`) removes all pnpm global packages and the store along with everything else. Use [`backup.sh`](#backups) to preserve them.
 - If the base image's Node major version bumps, native addons will break. Run [`/migrate-pnpm.sh`](#node-version-migration-2) to reinstall and recompile them.
 - `du -sh /root/.claude/pnpm-*` to audit space usage. The content-addressable store deduplicates package content but can still grow large if many different versions are installed over time.
+
+---
+
+## Adding UV packages
+
+[uv](https://docs.astral.sh/uv/) is a fast Python package and project manager from Astral. It is pre-installed in the image. Unlike `pip install --user`, UV installs tools into **isolated virtual environments** so each tool has its own dependency tree with no conflicts.
+
+### How it works
+
+On every start, `entrypoint.sh` exports:
+
+| Variable                                           | Effect                                                  |
+| -------------------------------------------------- | ------------------------------------------------------- |
+| `UV_TOOL_DIR=/root/.claude/uv-tools`               | Isolated venvs for each `uv tool install`-ed package    |
+| `UV_TOOL_BIN_DIR=/root/.claude/uv-tool-bin`        | Shim scripts for tool executables; added to `PATH`      |
+| `UV_CACHE_DIR=/root/.claude/uv-cache`              | Download cache; also holds `uvx` ephemeral environments |
+| `UV_PYTHON_INSTALL_DIR=/root/.claude/uv-python`    | Python versions downloaded via `uv python install`      |
+
+Layout added to the volume:
+
+```
+/root/.claude/
+├── uv-tools/       # one subdirectory per installed tool, each containing an isolated venv
+├── uv-tool-bin/    # shim scripts on PATH
+├── uv-cache/       # download cache; uvx/_/... for uvx ephemeral environments
+└── uv-python/      # UV-managed Python installations
+```
+
+### Installing a tool
+
+`uv tool install` installs a Python application into its own isolated venv and creates a shim in `uv-tool-bin/` so the executable is available on PATH:
+
+```bash
+docker compose exec claudeclaw uv tool install ruff
+docker compose exec claudeclaw ruff --version   # shim persists across restarts
+```
+
+Upgrade a tool to a newer version:
+
+```bash
+docker compose exec claudeclaw uv tool install --upgrade ruff
+```
+
+List installed tools:
+
+```bash
+docker compose exec claudeclaw uv tool list
+```
+
+### uvx
+
+`uvx` runs a Python tool without permanently installing it — equivalent to `npx` for Python. UV downloads the package into a temporary environment in `UV_CACHE_DIR` and runs it:
+
+```bash
+docker compose exec claudeclaw uvx cowsay hello   # downloads on first call
+docker compose exec claudeclaw uvx cowsay hello   # reads from volume cache
+```
+
+No persistent entry is left behind. The volume cache means subsequent calls are fast, even after container recreation.
+
+### Bake tools into a custom image
+
+```Dockerfile
+FROM ghcr.io/paulmeier/claudeclaw-container:latest
+RUN uv tool install ruff httpie
+```
+
+### Python version migration
+
+UV tools run in isolated venvs that record the Python interpreter path they were created with. If the base image's system Python minor version changes (e.g. 3.11 → 3.12), those interpreter paths become stale and the tools will fail to run. Run `migrate-uv.sh` to recreate each venv under the current Python:
+
+```bash
+docker compose exec claudeclaw /migrate-uv.sh
+```
+
+The script reads the original package name and version specifier from each tool's `uv-receipt.json`, then calls `uv tool install --reinstall` to rebuild the venv. If `uvx` environments are also broken, clearing the cache forces them to be rebuilt on the next call:
+
+```bash
+docker compose exec claudeclaw uv cache clean
+```
+
+### Caveats
+
+- Wiping the volume (`docker compose down -v`) removes all UV tool venvs and the cache. Use [`backup.sh`](#backups) to preserve them.
+- If the base image's Python minor version bumps, tool venvs become stale. Run [`/migrate-uv.sh`](#python-version-migration-1) to recreate them.
+- UV-managed Pythons (`uv python install`) are persisted under `uv-python/` in the volume. If you rely on a specific UV-managed Python for your tools, it will survive image rebuilds without being re-fetched.
+- `du -sh /root/.claude/uv-*` to audit space usage.
 
 ---
 
