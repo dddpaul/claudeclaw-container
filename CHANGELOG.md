@@ -5,6 +5,14 @@
 
 * persist npm global installs and npx cache in the appdata volume ([1786d18](https://github.com/paulmeier/claudeclaw-container/commit/1786d18735738715a901f2acd795c866559fd936))
 
+## [1.8.0](https://github.com/paulmeier/claudeclaw-container/compare/v1.7.1...v1.8.0) (2026-05-18)
+
+
+### Features
+
+* persist pip-installed Python packages in the volume ([4dc4fd7](https://github.com/paulmeier/claudeclaw-container/commit/4dc4fd741328ce42dd3d43f3552d1e86efa0c3d7))
+* persist pip-installed Python packages in the volume ([42fc51e](https://github.com/paulmeier/claudeclaw-container/commit/42fc51e28ad50367cfef6e6264dbc7568a26885f))
+
 ## [1.7.1](https://github.com/paulmeier/claudeclaw-container/compare/v1.7.0...v1.7.1) (2026-05-18)
 
 
