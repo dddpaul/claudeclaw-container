@@ -103,13 +103,13 @@ export UV_PYTHON_INSTALL_DIR=/root/.claude/uv-python
 export PATH=/root/.claude/uv-tool-bin:$PATH
 
 # Persist pnpm global package shims inside the volume.
-# PNPM_HOME is where pnpm places the executable shims for globally added packages
-# (pnpm add -g). The content-addressable store path is set in the image via
-# /root/.config/pnpm/rc (store-dir=/root/.claude/pnpm-store), so store data also
-# lands in the volume without needing an env var here.
-mkdir -p /root/.claude/pnpm-global /root/.claude/pnpm-store
+# PNPM_HOME is where pnpm places its content-addressable store, manifest, and a
+# bin/ subdirectory containing the executable shims for globally added packages
+# (pnpm add -g). Both the store and bin/ stay inside PNPM_HOME, so the whole
+# tree lives in the volume and survives image updates.
+mkdir -p /root/.claude/pnpm-global
 export PNPM_HOME=/root/.claude/pnpm-global
-export PATH=/root/.claude/pnpm-global:$PATH
+export PATH=/root/.claude/pnpm-global/bin:$PATH
 
 # Run startup diagnostics: print runtime versions, package inventories, and any
 # migration warnings. Always exits 0 — warnings are advisory.

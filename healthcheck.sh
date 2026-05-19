@@ -20,7 +20,6 @@ _NPM_CACHE="${NPM_CONFIG_CACHE:-/root/.claude/npm-cache}"
 _PYTHON_USER="${PYTHONUSERBASE:-/root/.claude/python-user}"
 _PIP_CACHE="${PIP_CACHE_DIR:-/root/.claude/pip-cache}"
 _PNPM_GLOBAL="${PNPM_HOME:-/root/.claude/pnpm-global}"
-_PNPM_STORE="/root/.claude/pnpm-store"
 _UV_TOOLS="${UV_TOOL_DIR:-/root/.claude/uv-tools}"
 _UV_TOOL_BINS="${UV_TOOL_BIN_DIR:-/root/.claude/uv-tool-bin}"
 _UV_CACHE="${UV_CACHE_DIR:-/root/.claude/uv-cache}"
@@ -151,7 +150,7 @@ _kv "packages" "${#_pnpm_pkgs[@]}"
 if [ ${#_pnpm_pkgs[@]} -gt 0 ]; then
     for _p in "${_pnpm_pkgs[@]}"; do _sub "$_p"; done
 fi
-_kv "store" "$(_dirsize "$_PNPM_STORE")"
+_kv "total size" "$(_dirsize "$_PNPM_GLOBAL")"
 
 if [ "$_NODE_ABI_CHANGED" = true ] && [ ${#_pnpm_pkgs[@]} -gt 0 ]; then
     _warn "Node ABI changed ($_STORED_ABI → $_NODE_ABI) — pnpm native addons may be broken"
@@ -269,7 +268,6 @@ _kv "npm-cache/"    "$(_dirsize "$_NPM_CACHE")"
 _kv "python-user/"  "$(_dirsize "$_PYTHON_USER")"
 _kv "pip-cache/"    "$(_dirsize "$_PIP_CACHE")"
 _kv "pnpm-global/"  "$(_dirsize "$_PNPM_GLOBAL")"
-_kv "pnpm-store/"   "$(_dirsize "$_PNPM_STORE")"
 _kv "uv-tools/"     "$(_dirsize "$_UV_TOOLS")"
 _kv "uv-tool-bin/"  "$(_dirsize "$_UV_TOOL_BINS")"
 _kv "uv-cache/"     "$(_dirsize "$_UV_CACHE")"

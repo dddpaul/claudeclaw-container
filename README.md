@@ -300,8 +300,7 @@ Everything is stored in the `claudeclaw-data` named volume at `/root/.claude/`:
 | `npm-cache/`               | npm download cache; `_npx/` subdir holds the npx tarball cache |
 | `python-user/`             | `pip install` site-packages + bins      |
 | `pip-cache/`               | pip download cache                      |
-| `pnpm-global/`             | pnpm global package shims + bins        |
-| `pnpm-store/`              | pnpm content-addressable package store  |
+| `pnpm-global/`             | pnpm content-addressable store, manifest, and `bin/` shims |
 | `uv-tools/`                | `uv tool install` isolated venvs        |
 | `uv-tool-bin/`             | UV tool shims + bins                    |
 | `uv-cache/`                | UV download cache; `uvx` environments   |
@@ -489,18 +488,18 @@ pnpm is pre-installed in the image. Its global package shims and content-address
 
 On every start, `entrypoint.sh` exports:
 
-| Variable / config                                           | Effect                                                  |
-| ----------------------------------------------------------- | ------------------------------------------------------- |
-| `PNPM_HOME=/root/.claude/pnpm-global`                      | Global package shims (executables) go here              |
-| `PATH=/root/.claude/pnpm-global:$PATH`                     | Those shims are on `PATH` for the daemon and every process it spawns |
-| `store-dir=/root/.claude/pnpm-store` (image-level config)  | pnpm's content-addressable store; written to `/root/.config/pnpm/rc` at image build time |
+| Variable                                       | Effect                                                  |
+| ---------------------------------------------- | ------------------------------------------------------- |
+| `PNPM_HOME=/root/.claude/pnpm-global`          | pnpm's content-addressable store, global manifest, and `bin/` shims all land under here |
+| `PATH=/root/.claude/pnpm-global/bin:$PATH`     | Shims are on `PATH` for the daemon and every process it spawns |
 
-The store config is baked into the image layer so it is always present; the store data itself lands in the volume at runtime. Layout added to the volume:
+Layout added to the volume:
 
 ```
-/root/.claude/
-├── pnpm-global/    # shim scripts on PATH (one per globally installed package)
-└── pnpm-store/     # content-addressable package store
+/root/.claude/pnpm-global/
+├── bin/        # shim scripts on PATH (one per globally installed package)
+├── global/     # pnpm global manifest
+└── store/      # content-addressable package store
 ```
 
 ### Installing a package

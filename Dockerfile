@@ -20,14 +20,10 @@ ENV PATH="/root/.bun/bin:$PATH"
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 ENV PATH="/root/.local/bin:$PATH"
 
-# Install Claude Code CLI and pnpm.
-# pnpm's content-addressable store is configured to the persistent volume path so
-# that downloaded package content survives image rebuilds. The store-dir setting is
-# written to pnpm's global rc file (/root/.config/pnpm/rc) which lives in the image
-# layer; actual store data lands in the volume at runtime via PNPM_HOME (entrypoint).
-RUN npm install -g @anthropic-ai/claude-code pnpm \
-    && mkdir -p /root/.config/pnpm \
-    && printf 'store-dir=/root/.claude/pnpm-store\n' > /root/.config/pnpm/rc
+# Install Claude Code CLI and pnpm. PNPM_HOME (set in entrypoint) puts pnpm's
+# content-addressable store, manifest, and bin/ directory into the persistent
+# volume so installed packages survive image rebuilds.
+RUN npm install -g @anthropic-ai/claude-code pnpm
 
 # Clone claudeclaw at the ref specified by CLAUDECLAW_REF.
 # Override at build time with --build-arg CLAUDECLAW_REF=<branch|tag|sha> to pin.
