@@ -20,10 +20,34 @@ ENV PATH="/root/.bun/bin:$PATH"
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 ENV PATH="/root/.local/bin:$PATH"
 
-# Install Claude Code CLI and pnpm. PNPM_HOME (set in entrypoint) puts pnpm's
+# Install Claude Code CLI and pnpm. PNPM_HOME (below) puts pnpm's
 # content-addressable store, manifest, and bin/ directory into the persistent
 # volume so installed packages survive image rebuilds.
 RUN npm install -g @anthropic-ai/claude-code pnpm
+
+# ── Persistence env vars ──────────────────────────────────────────────────────
+# Redirect each package manager's install paths and cache into /root/.claude/
+# (the volume) so installed tooling survives image rebuilds and container
+# recreation. Set as Dockerfile ENV (not entrypoint exports) so they are
+# inherited by `docker exec` shells too — without this, user-initiated installs
+# like `docker compose exec claudeclaw pip install foo` would fail with PEP 668
+# or silently land in the writable image layer. The corresponding directories
+# are created at runtime by entrypoint.sh (the volume doesn't exist at
+# image-build time, so mkdir must happen there).
+ENV IS_SANDBOX=1 \
+    TMPDIR=/root/.claude/tmp \
+    NPM_CONFIG_PREFIX=/root/.claude/npm-global \
+    NPM_CONFIG_CACHE=/root/.claude/npm-cache \
+    PYTHONUSERBASE=/root/.claude/python-user \
+    PIP_USER=1 \
+    PIP_BREAK_SYSTEM_PACKAGES=1 \
+    PIP_CACHE_DIR=/root/.claude/pip-cache \
+    PNPM_HOME=/root/.claude/pnpm-global \
+    UV_TOOL_DIR=/root/.claude/uv-tools \
+    UV_TOOL_BIN_DIR=/root/.claude/uv-tool-bin \
+    UV_CACHE_DIR=/root/.claude/uv-cache \
+    UV_PYTHON_INSTALL_DIR=/root/.claude/uv-python
+ENV PATH="/root/.claude/npm-global/bin:/root/.claude/python-user/bin:/root/.claude/pnpm-global/bin:/root/.claude/uv-tool-bin:$PATH"
 
 # Clone claudeclaw at the ref specified by CLAUDECLAW_REF.
 # Override at build time with --build-arg CLAUDECLAW_REF=<branch|tag|sha> to pin.
