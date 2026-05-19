@@ -5,6 +5,14 @@
 
 * persist npm global installs and npx cache in the appdata volume ([1786d18](https://github.com/paulmeier/claudeclaw-container/commit/1786d18735738715a901f2acd795c866559fd936))
 
+## [1.9.1](https://github.com/paulmeier/claudeclaw-container/compare/v1.9.0...v1.9.1) (2026-05-19)
+
+
+### Bug Fixes
+
+* move persistence env vars into Dockerfile ENV so docker exec inherits them ([dedd017](https://github.com/paulmeier/claudeclaw-container/commit/dedd01732a2021056eca42b4db6ce09281bba63a))
+* move persistence env vars into Dockerfile ENV so docker exec inherits them ([495b46b](https://github.com/paulmeier/claudeclaw-container/commit/495b46b00f4e9822757b256a93f8b21c394b5c7a))
+
 ## [1.9.0](https://github.com/paulmeier/claudeclaw-container/compare/v1.8.0...v1.9.0) (2026-05-19)
 
 
