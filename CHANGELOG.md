@@ -5,6 +5,18 @@
 
 * persist npm global installs and npx cache in the appdata volume ([1786d18](https://github.com/paulmeier/claudeclaw-container/commit/1786d18735738715a901f2acd795c866559fd936))
 
+## [1.9.0](https://github.com/paulmeier/claudeclaw-container/compare/v1.8.0...v1.9.0) (2026-05-19)
+
+
+### Features
+
+* UV + pnpm support, base-image migration scripts, and startup healthcheck ([0a0b48d](https://github.com/paulmeier/claudeclaw-container/commit/0a0b48dbe0e975c6c2ca300fb8407f0aeaf71d95))
+
+
+### Bug Fixes
+
+* pnpm PATH off-by-`/bin` and drop dead pnpm-store machinery ([3c68f7b](https://github.com/paulmeier/claudeclaw-container/commit/3c68f7b2c2b90a704a7b2cf12c0677bc89d421c1))
+
 ## [1.8.0](https://github.com/paulmeier/claudeclaw-container/compare/v1.7.1...v1.8.0) (2026-05-18)
 
 
