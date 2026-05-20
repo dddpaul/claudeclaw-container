@@ -1,25 +1,33 @@
 name: Upstream sync
 
 # Once a week, check whether moazbuilds/claudeclaw's master has advanced past
-# the SHA recorded in .upstream-ref. If so, open a PR that bumps the file with
-# a `feat:` commit. Merging that PR lands the bump on main, which triggers
-# release-please to open a release PR; merging the release PR cuts the next
-# version and publishes the image.
+# the SHA recorded in .upstream-ref. If so, open a `feat:` bump PR and
+# immediately squash-merge it. The merge is authored by the release-bot App
+# (NOT the default GITHUB_TOKEN), so the push to main triggers release-please,
+# which in turn auto-merges its release PR and dispatches docker-publish.
+# End-to-end: cron -> ~10-15 min later, image is on GHCR. No human in the loop.
 
 on:
   schedule:
     - cron: '17 9 * * 1'  # Mondays 09:17 UTC
   workflow_dispatch:
 
-permissions:
-  contents: write
-  pull-requests: write
+permissions: {}
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
+      - name: Mint App token
+        id: app
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+
       - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app.outputs.token }}
 
       - name: Resolve upstream HEAD
         id: upstream
@@ -46,10 +54,11 @@ jobs:
             echo "Upstream advanced: ${current:-<none>} -> $new"
           fi
 
-      - name: Open bump PR
+      - name: Bump, push, and merge
         if: steps.diff.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          APP_SLUG: ${{ steps.app.outputs.app-slug }}
           NEW_SHA: ${{ steps.upstream.outputs.sha }}
           NEW_SHORT: ${{ steps.upstream.outputs.short }}
           PREV_SHA: ${{ steps.diff.outputs.previous }}
@@ -61,8 +70,11 @@ jobs:
             exit 0
           fi
 
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Commit as the App's bot identity so attribution is correct.
+          bot_id=$(gh api "/users/${APP_SLUG}[bot]" --jq .id)
+          git config user.name "${APP_SLUG}[bot]"
+          git config user.email "${bot_id}+${APP_SLUG}[bot]@users.noreply.github.com"
+
           git checkout -b "$branch"
           echo "$NEW_SHA" > .upstream-ref
           git add .upstream-ref
@@ -80,8 +92,10 @@ jobs:
             --base main \
             --head "$branch" \
             --title "feat: bump claudeclaw to ${NEW_SHORT}" \
-            --body "Weekly upstream-sync workflow detected new commits on \`moazbuilds/claudeclaw@master\`.
+            --body "Automated weekly upstream sync.
 
           ${compare_line}
 
-          Merging this PR lands the bump on \`main\`; release-please will then open a release PR that cuts the next minor version and publishes the image."
+          Squash-merged immediately by the release-bot to trigger release-please."
+
+          gh pr merge "$branch" --squash --delete-branch
