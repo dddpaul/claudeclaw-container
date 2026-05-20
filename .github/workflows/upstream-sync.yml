@@ -1,0 +1,87 @@
+name: Upstream sync
+
+# Once a week, check whether moazbuilds/claudeclaw's master has advanced past
+# the SHA recorded in .upstream-ref. If so, open a PR that bumps the file with
+# a `feat:` commit. Merging that PR lands the bump on main, which triggers
+# release-please to open a release PR; merging the release PR cuts the next
+# version and publishes the image.
+
+on:
+  schedule:
+    - cron: '17 9 * * 1'  # Mondays 09:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve upstream HEAD
+        id: upstream
+        run: |
+          sha=$(git ls-remote https://github.com/moazbuilds/claudeclaw HEAD | awk '{print $1}')
+          if [ -z "$sha" ]; then
+            echo "Failed to resolve upstream HEAD" >&2
+            exit 1
+          fi
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "short=${sha:0:7}" >> "$GITHUB_OUTPUT"
+
+      - name: Compare with .upstream-ref
+        id: diff
+        run: |
+          current=$(tr -d '[:space:]' < .upstream-ref 2>/dev/null || echo "")
+          new="${{ steps.upstream.outputs.sha }}"
+          if [ "$current" = "$new" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No upstream changes (still at $current)."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "previous=$current" >> "$GITHUB_OUTPUT"
+            echo "Upstream advanced: ${current:-<none>} -> $new"
+          fi
+
+      - name: Open bump PR
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEW_SHA: ${{ steps.upstream.outputs.sha }}
+          NEW_SHORT: ${{ steps.upstream.outputs.short }}
+          PREV_SHA: ${{ steps.diff.outputs.previous }}
+        run: |
+          branch="chore/upstream-sync-${NEW_SHORT}"
+
+          if gh pr list --head "$branch" --state open --json number --jq '.[0].number' | grep -q .; then
+            echo "PR for $branch already open; nothing to do."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          echo "$NEW_SHA" > .upstream-ref
+          git add .upstream-ref
+          git commit -m "feat: bump claudeclaw to ${NEW_SHORT}" \
+                     -m "Upstream: https://github.com/moazbuilds/claudeclaw/commit/${NEW_SHA}"
+          git push -u origin "$branch"
+
+          if [ -n "$PREV_SHA" ]; then
+            compare_line="**Compare:** https://github.com/moazbuilds/claudeclaw/compare/${PREV_SHA}...${NEW_SHA}"
+          else
+            compare_line="**Commit:** https://github.com/moazbuilds/claudeclaw/commit/${NEW_SHA}"
+          fi
+
+          gh pr create \
+            --base main \
+            --head "$branch" \
+            --title "feat: bump claudeclaw to ${NEW_SHORT}" \
+            --body "Weekly upstream-sync workflow detected new commits on \`moazbuilds/claudeclaw@master\`.
+
+          ${compare_line}
+
+          Merging this PR lands the bump on \`main\`; release-please will then open a release PR that cuts the next minor version and publishes the image."
