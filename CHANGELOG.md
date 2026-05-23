@@ -5,6 +5,13 @@
 
 * persist npm global installs and npx cache in the appdata volume ([1786d18](https://github.com/paulmeier/claudeclaw-container/commit/1786d18735738715a901f2acd795c866559fd936))
 
+## [1.10.0](https://github.com/dddpaul/claudeclaw-container/compare/v1.9.1...v1.10.0) (2026-05-23)
+
+
+### Features
+
+* trixie base + Chromium runtime deps for dev-browser plugin ([3272773](https://github.com/dddpaul/claudeclaw-container/commit/3272773a0432968a2c1c60f82f7f9d96003df243))
+
 ## [1.9.1](https://github.com/paulmeier/claudeclaw-container/compare/v1.9.0...v1.9.1) (2026-05-19)
 
 
