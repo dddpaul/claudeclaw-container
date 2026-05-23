@@ -3,10 +3,10 @@ id: TASK-2
 title: >-
   Switch base to node:24-trixie-slim and add Chromium runtime deps for
   dev-browser plugin
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-23 06:42'
-updated_date: '2026-05-23 08:37'
+updated_date: '2026-05-23 13:28'
 labels: []
 dependencies: []
 ordinal: 2000
@@ -39,9 +39,9 @@ CI cache note: `.github/workflows/docker-publish.yml` uses `cache-from: type=gha
 - [x] #1 Dockerfile `FROM` changes from `node:24-slim` to `node:24-trixie-slim` (explicit, no implicit floating tag).
 - [x] #2 A single apt-get layer installs the Chromium runtime deps using **trixie t64-renamed package names** (the bookworm list will fail on trixie), with `--no-install-recommends` and `rm -rf /var/lib/apt/lists/*`; layer adds <100MB compressed; the package list carries a Dockerfile comment naming the Playwright version + date validated against.
 - [x] #3 apt layer is installed unconditionally on both linux/amd64 and linux/arm64 (no TARGETARCH gate). Dockerfile comment cites: "dev-browser ships linux-arm64 since v0.2.3, confirmed via GitHub Releases on 2026-05-23."
-- [ ] #4 Built image reports glibc ≥2.39: `docker run --rm <image> ldd --version | head -1` matches `GLIBC 2\.(39|4[0-9]|[5-9][0-9])` (current trixie ships 2.41; the loose match survives future point releases).
-- [ ] #5 End-to-end smoke script committed at `tests/dev-browser-smoke.sh` and runnable against the built image: `npm install -g dev-browser` → `dev-browser install` → one-liner Playwright script that launches Chromium and reads about:blank's title — script exits 0 on success **without the musl-swap step** (the swap is no longer needed because the base now ships glibc 2.41).
-- [ ] #6 No regressions in existing tooling on trixie: bun, uv, pnpm, npm versions unchanged; entrypoint.sh + healthcheck.sh paths still resolve; jq, curl, git, python3 packages install. The python3.11 → 3.13 bump is an expected one-time migration for existing volumes — already handled by healthcheck.sh warn + `/migrate-python.sh` — and must be called out in the README / release notes.
+- [x] #4 Built image reports glibc ≥2.39: `docker run --rm <image> ldd --version | head -1` matches `GLIBC 2\.(39|4[0-9]|[5-9][0-9])` (current trixie ships 2.41; the loose match survives future point releases).
+- [x] #5 End-to-end smoke script committed at `tests/dev-browser-smoke.sh` and runnable against the built image: `npm install -g dev-browser` → `dev-browser install` → one-liner Playwright script that launches Chromium and reads about:blank's title — script exits 0 on success **without the musl-swap step** (the swap is no longer needed because the base now ships glibc 2.41).
+- [x] #6 No regressions in existing tooling on trixie: bun, uv, pnpm, npm versions unchanged; entrypoint.sh + healthcheck.sh paths still resolve; jq, curl, git, python3 packages install. The python3.11 → 3.13 bump is an expected one-time migration for existing volumes — already handled by healthcheck.sh warn + `/migrate-python.sh` — and must be called out in the README / release notes.
 - [x] #7 README documents (a) Chromium runtime deps are baked in, (b) consumer-side musl-swap workarounds can be removed, (c) python3.11 → 3.13 migration warning on first start of existing volumes — run `/migrate-python.sh`. Do NOT hand-edit CHANGELOG.md — use a `feat:` conventional commit so release-please generates the entry.
 - [x] #8 Hadolint passes on the modified Dockerfile.
 <!-- AC:END -->

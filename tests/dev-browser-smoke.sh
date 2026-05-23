@@ -27,8 +27,8 @@ docker run --rm --entrypoint bash "$IMAGE" -c '
   echo "[smoke] installing dev-browser + playwright"
   npm install -g dev-browser playwright >/dev/null
 
-  echo "[smoke] dev-browser --version:"
-  dev-browser --version
+  echo "[smoke] sanity: dev-browser binary loads (would fail GLIBC_2.39 on bookworm):"
+  dev-browser --help >/dev/null && echo "  ok"
 
   echo "[smoke] installing Chromium"
   npx --yes playwright install chromium >/dev/null
