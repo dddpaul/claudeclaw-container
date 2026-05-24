@@ -5,6 +5,48 @@
 
 * persist npm global installs and npx cache in the appdata volume ([1786d18](https://github.com/paulmeier/claudeclaw-container/commit/1786d18735738715a901f2acd795c866559fd936))
 
+## [1.11.0](https://github.com/dddpaul/claudeclaw-container/compare/v1.10.0...v1.11.0) (2026-05-24)
+
+
+### Features
+
+* add backup.sh with README docs and zsh alias instructions ([aa80b00](https://github.com/dddpaul/claudeclaw-container/commit/aa80b002603ad44d0a5f868ffdc280ceec4e1841))
+* add Dockerfile lint, Trivy security scan, and README badges ([0991ea6](https://github.com/dddpaul/claudeclaw-container/commit/0991ea6ac050b524c6585324babbc3cd2b37086b))
+* add shell.sh, settings.example.json, and desktop access docs ([eb2266e](https://github.com/dddpaul/claudeclaw-container/commit/eb2266ea1d5d30e92a1d88b18ca5f2cc8df4f20d))
+* migrate to release-please + GHCR (same pattern as plus-container) ([c86a75e](https://github.com/dddpaul/claudeclaw-container/commit/c86a75ee12aa3da227983f61d4907934bbceab95))
+* migrate to release-please + GHCR (same pattern as plus-container) ([64b0594](https://github.com/dddpaul/claudeclaw-container/commit/64b0594f4d4be8d1dcac66dc69b6ccd7804cf2b7))
+* persist npm global installs and npx cache in the appdata volume ([579bb12](https://github.com/dddpaul/claudeclaw-container/commit/579bb122255e10ec6b1690d8b60e6758c96cb87a))
+* persist npm global installs and npx cache in the appdata volume ([1786d18](https://github.com/dddpaul/claudeclaw-container/commit/1786d18735738715a901f2acd795c866559fd936))
+* persist pip-installed Python packages in the volume ([4dc4fd7](https://github.com/dddpaul/claudeclaw-container/commit/4dc4fd741328ce42dd3d43f3552d1e86efa0c3d7))
+* persist pip-installed Python packages in the volume ([42fc51e](https://github.com/dddpaul/claudeclaw-container/commit/42fc51e28ad50367cfef6e6264dbc7568a26885f))
+* restore lint and security as standalone workflows for badges ([a4f72fe](https://github.com/dddpaul/claudeclaw-container/commit/a4f72fee1393cf0736f56cee9428f9a5b8cd8e64))
+* support running backup.sh from inside the container ([41ca68e](https://github.com/dddpaul/claudeclaw-container/commit/41ca68ea0acbaef12b2848a230d6e94b520cc499))
+* trixie base + Chromium runtime deps for dev-browser plugin ([bf9fed9](https://github.com/dddpaul/claudeclaw-container/commit/bf9fed9eba9bb431f95f18019a520b4a43ecae34))
+* UV + pnpm support, base-image migration scripts, and startup healthcheck ([0a0b48d](https://github.com/dddpaul/claudeclaw-container/commit/0a0b48dbe0e975c6c2ca300fb8407f0aeaf71d95))
+
+
+### Bug Fixes
+
+* correct trivy-action version to v0.36.0 ([57b3399](https://github.com/dddpaul/claudeclaw-container/commit/57b3399c8d3bf5fe671d6ce0b08ec460b203cd98))
+* drop semantic-release git/changelog plugins blocked by branch protection ([8e0bb2c](https://github.com/dddpaul/claudeclaw-container/commit/8e0bb2c4dfd84ac2e59793f2c9042c223f893623))
+* drop semantic-release git/changelog plugins blocked by branch protection ([ba1f7d6](https://github.com/dddpaul/claudeclaw-container/commit/ba1f7d6c34be5068f4d368d6748e4ec95f383242))
+* explicitly install ca-certificates in Dockerfile ([0e9b79a](https://github.com/dddpaul/claudeclaw-container/commit/0e9b79a68deca9464fe3050e2d0e42240178c579))
+* explicitly pass .hadolint.yaml config to hadolint action ([757b68b](https://github.com/dddpaul/claudeclaw-container/commit/757b68bd7025682954652af730272a6e00f53b9a))
+* install python3 to support Claude Code subprocesses ([7b85e76](https://github.com/dddpaul/claudeclaw-container/commit/7b85e76996bfc45728a95fb72c0eb8f38e6e0695))
+* install python3 to support Claude Code subprocesses ([270e932](https://github.com/dddpaul/claudeclaw-container/commit/270e932e12c0ad2c43c0ec247579cacd3abebd22)), closes [#11](https://github.com/dddpaul/claudeclaw-container/issues/11)
+* make CLAUDECLAW_REF actually pin the upstream checkout ([33f2f91](https://github.com/dddpaul/claudeclaw-container/commit/33f2f910d7eeb4a33b29fee2db40b06ab1192318))
+* make CLAUDECLAW_REF actually pin the upstream checkout ([fa9aed8](https://github.com/dddpaul/claudeclaw-container/commit/fa9aed8909a7f988198ca3f78ac11eb1e435dfc0))
+* move persistence env vars into Dockerfile ENV so docker exec inherits them ([dedd017](https://github.com/dddpaul/claudeclaw-container/commit/dedd01732a2021056eca42b4db6ce09281bba63a))
+* move persistence env vars into Dockerfile ENV so docker exec inherits them ([495b46b](https://github.com/dddpaul/claudeclaw-container/commit/495b46b00f4e9822757b256a93f8b21c394b5c7a))
+* pnpm PATH off-by-`/bin` and drop dead pnpm-store machinery ([3c68f7b](https://github.com/dddpaul/claudeclaw-container/commit/3c68f7b2c2b90a704a7b2cf12c0677bc89d421c1))
+* publish release for Node 24 LTS upgrade ([ffeeac0](https://github.com/dddpaul/claudeclaw-container/commit/ffeeac041e17f4a8d646de64d4cc52257a8ff3c8))
+* remove incorrect ANTHROPIC_API_KEY requirement ([b3e8e60](https://github.com/dddpaul/claudeclaw-container/commit/b3e8e6016a39271996635e49feb5e9db90c16f57))
+* resolve hadolint warnings in Dockerfile ([8d54dc1](https://github.com/dddpaul/claudeclaw-container/commit/8d54dc107f1167dc028c5bf68e61fc902c1aa1ea))
+* set hadolint failure-threshold to error ([ad043f2](https://github.com/dddpaul/claudeclaw-container/commit/ad043f238313aa128f37289f07ada300446c3368))
+* set IS_SANDBOX=1 so Claude Code accepts --dangerously-skip-permissions as root ([e9e499b](https://github.com/dddpaul/claudeclaw-container/commit/e9e499bdef67b7f16c0da7065cae3fabcd6df8e9))
+* set IS_SANDBOX=1 so Claude Code works as root ([39b938c](https://github.com/dddpaul/claudeclaw-container/commit/39b938cdaf0426222829a1c31a904a125ea48fc1))
+* use inline ignore list for hadolint instead of config file ([5cf1c71](https://github.com/dddpaul/claudeclaw-container/commit/5cf1c71698e733588b475613ca795df9abb703bd))
+
 ## [1.10.0](https://github.com/dddpaul/claudeclaw-container/compare/v1.9.1...v1.10.0) (2026-05-24)
 
 
