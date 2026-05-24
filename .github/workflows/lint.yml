@@ -3,10 +3,10 @@ name: Lint
 on:
   push:
     branches:
-      - main
+      - backlog
   pull_request:
     branches:
-      - main
+      - backlog
 
 jobs:
   hadolint:
