@@ -44,3 +44,37 @@ jobs:
           gh workflow run docker-publish.yml \
             --repo ${{ github.repository }} \
             --field tag=${{ steps.release.outputs.tag_name }}
+
+      # If this release advanced the bundled upstream pin (i.e. it was a weekly
+      # upstream sync, not a plain code release), append a compare link so the
+      # automated bumps are self-documenting. Detected by diffing .upstream-ref
+      # between this release tag and the previous one via the contents API — no
+      # checkout, and it stays silent for releases that don't touch the pin.
+      - name: Append upstream compare to release notes
+        if: steps.release.outputs.release_created == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_BOT_TOKEN }}
+          NEW_TAG: ${{ steps.release.outputs.tag_name }}
+        run: |
+          repo="${{ github.repository }}"
+          prev_tag=$(gh release list --repo "$repo" --limit 2 --json tagName --jq '.[1].tagName // ""')
+          read_ref() {
+            gh api "repos/${repo}/contents/.upstream-ref?ref=$1" --jq '.content' 2>/dev/null \
+              | tr -d '\n' | base64 -d 2>/dev/null | tr -d '[:space:]'
+          }
+          new_ref=$(read_ref "$NEW_TAG")
+          old_ref=""
+          [ -n "$prev_tag" ] && old_ref=$(read_ref "$prev_tag")
+          if [ -z "$new_ref" ] || [ "$new_ref" = "$old_ref" ]; then
+            echo "No .upstream-ref change in ${NEW_TAG}; leaving notes as-is."
+            exit 0
+          fi
+          if [ -n "$old_ref" ]; then
+            compare="https://github.com/moazbuilds/claudeclaw/compare/${old_ref}...${new_ref}"
+          else
+            compare="https://github.com/moazbuilds/claudeclaw/commit/${new_ref}"
+          fi
+          body=$(gh release view "$NEW_TAG" --repo "$repo" --json body --jq '.body')
+          printf '%s\n\n**Upstream changes:** %s\n' "$body" "$compare" \
+            | gh release edit "$NEW_TAG" --repo "$repo" --notes-file -
+          echo "Appended upstream compare to ${NEW_TAG}: ${compare}"
