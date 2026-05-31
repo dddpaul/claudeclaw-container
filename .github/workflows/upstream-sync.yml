@@ -2,8 +2,8 @@ name: Upstream sync
 
 # Once a week, check whether moazbuilds/claudeclaw's master has advanced past
 # the SHA recorded in .upstream-ref. If so, open a `feat:` bump PR and
-# immediately squash-merge it. The merge is authored by the release-bot App
-# (NOT the default GITHUB_TOKEN), so the push to main triggers release-please,
+# immediately squash-merge it. The merge is authored by the RELEASE_BOT_TOKEN
+# PAT (NOT the default GITHUB_TOKEN), so the push to main triggers release-please,
 # which in turn auto-merges its release PR and dispatches docker-publish.
 # End-to-end: cron -> ~10-15 min later, image is on GHCR. No human in the loop.
 
@@ -18,16 +18,9 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Mint App token
-        id: app
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
-          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
-
       - uses: actions/checkout@v4
         with:
-          token: ${{ steps.app.outputs.token }}
+          token: ${{ secrets.RELEASE_BOT_TOKEN }}
 
       - name: Resolve upstream HEAD
         id: upstream
@@ -57,8 +50,7 @@ jobs:
       - name: Bump, push, and merge
         if: steps.diff.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ steps.app.outputs.token }}
-          APP_SLUG: ${{ steps.app.outputs.app-slug }}
+          GH_TOKEN: ${{ secrets.RELEASE_BOT_TOKEN }}
           NEW_SHA: ${{ steps.upstream.outputs.sha }}
           NEW_SHORT: ${{ steps.upstream.outputs.short }}
           PREV_SHA: ${{ steps.diff.outputs.previous }}
@@ -70,10 +62,10 @@ jobs:
             exit 0
           fi
 
-          # Commit as the App's bot identity so attribution is correct.
-          bot_id=$(gh api "/users/${APP_SLUG}[bot]" --jq .id)
-          git config user.name "${APP_SLUG}[bot]"
-          git config user.email "${bot_id}+${APP_SLUG}[bot]@users.noreply.github.com"
+          # Commit under a stable bot identity; the push itself is authed by
+          # the PAT (attributed to its owner in the repo's activity).
+          git config user.name "claudeclaw-release-bot"
+          git config user.email "claudeclaw-release-bot@users.noreply.github.com"
 
           git checkout -b "$branch"
           echo "$NEW_SHA" > .upstream-ref

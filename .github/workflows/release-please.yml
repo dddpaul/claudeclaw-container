@@ -1,15 +1,14 @@
 name: Release Please
 
 # Opens (and keeps updating) a release PR whenever a conventional-commit
-# `feat:` or `fix:` lands on main, then immediately squash-merges it via
-# the release-bot App. The merge — authored by the App, not GITHUB_TOKEN —
-# triggers a second run of this workflow on push:main, which detects
-# `release_created=true` and dispatches docker-publish.yml at the new tag.
+# `feat:` or `fix:` lands on main, then immediately squash-merges it using
+# the RELEASE_BOT_TOKEN PAT. The merge — authored by the PAT, not the default
+# GITHUB_TOKEN — triggers a second run of this workflow on push:main, which
+# detects `release_created=true` and dispatches docker-publish.yml at the tag.
 #
-# Why dispatch instead of `release: published`? Releases created by App
-# tokens DO trigger downstream workflow runs, but to keep parity with the
-# pre-automation behavior (where the default GITHUB_TOKEN required this
-# bridge), we still dispatch explicitly.
+# A PAT (not GITHUB_TOKEN) is required because GITHUB_TOKEN-authored pushes
+# don't trigger downstream workflow runs (GitHub loop-prevention). The
+# RELEASE_BOT_TOKEN PAT needs Contents + Pull requests + Actions: read/write.
 
 on:
   push:
@@ -22,24 +21,17 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
-      - name: Mint App token
-        id: app
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
-          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
-
       - id: release
         uses: googleapis/release-please-action@v4
         with:
-          token: ${{ steps.app.outputs.token }}
+          token: ${{ secrets.RELEASE_BOT_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
       - name: Auto-merge release PR
         if: steps.release.outputs.pr
         env:
-          GH_TOKEN: ${{ steps.app.outputs.token }}
+          GH_TOKEN: ${{ secrets.RELEASE_BOT_TOKEN }}
         run: |
           pr_number=$(echo '${{ steps.release.outputs.pr }}' | jq -r .number)
           gh pr merge "$pr_number" --repo ${{ github.repository }} --squash --delete-branch
@@ -47,7 +39,7 @@ jobs:
       - name: Trigger docker-publish for the new release
         if: steps.release.outputs.release_created == 'true'
         env:
-          GH_TOKEN: ${{ steps.app.outputs.token }}
+          GH_TOKEN: ${{ secrets.RELEASE_BOT_TOKEN }}
         run: |
           gh workflow run docker-publish.yml \
             --repo ${{ github.repository }} \
