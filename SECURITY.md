@@ -25,7 +25,7 @@ Report vulnerabilities privately via GitHub's
 3. Fill out the advisory form with as much detail as you can — affected
    versions, reproduction steps, impact, and any suggested mitigation.
 
-If you cannot use GitHub's advisory flow, email **paulmartinmeier@gmail.com**
+If you cannot use GitHub's advisory flow, email **longish.physic0h@icloud.com**
 with the subject line `[claudeclaw-container] Security report` and the same
 information.
 
