@@ -21,7 +21,7 @@
 #
 # Env:
 #   PLUS_REPO  target repo   (default: paulmeier/claudeclaw-plus-container)
-#   GH_TOKEN   gh/git auth   (CI: release-bot app token scoped to the plus repo;
+#   GH_TOKEN   gh/git auth   (CI: the MIRROR_TOKEN fine-grained PAT;
 #                             local: your `gh auth` login)
 #   DRY_RUN    if non-empty, do everything except `git push` + `gh pr create`
 set -euo pipefail

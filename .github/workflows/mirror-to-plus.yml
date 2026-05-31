@@ -6,10 +6,11 @@ name: Mirror to plus
 # copy-paste. Branding and a local build are reviewed on the generated PR — this
 # workflow never merges. Engine: scripts/mirror-to-plus.sh.
 #
-# Auth: a release-bot GitHub App token scoped to the plus repo (the default
-# GITHUB_TOKEN cannot write to another repo). Requires that App installed on
-# claudeclaw-plus-container plus the RELEASE_BOT_APP_ID / RELEASE_BOT_PRIVATE_KEY
-# secrets (the same App the release pipeline uses).
+# Auth: a fine-grained PAT in the MIRROR_TOKEN secret (the default GITHUB_TOKEN
+# cannot write to another repo). The PAT must be scoped to
+# claudeclaw-plus-container with permissions Contents: read/write and
+# Pull requests: read/write. Set it once with:
+#   gh secret set MIRROR_TOKEN --repo paulmeier/claudeclaw-container
 
 on:
   push:
@@ -41,18 +42,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Mint a token scoped to the plus repo
-        id: app
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ secrets.RELEASE_BOT_APP_ID }}
-          private-key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          repositories: claudeclaw-plus-container
-
       - name: Mirror
         env:
-          GH_TOKEN: ${{ steps.app.outputs.token }}
+          GH_TOKEN: ${{ secrets.MIRROR_TOKEN }}
           BASE_SHA: ${{ github.event.inputs.base_ref || github.event.before }}
           HEAD_SHA: ${{ github.event.inputs.head_ref || github.sha }}
         run: bash scripts/mirror-to-plus.sh
